@@ -25,11 +25,6 @@ public class GameActivity extends AppCompatActivity {
     double speedUP = 1;
     double count = 0;
     Thread gameMusicThread;
-    SoundThread sThread;
-    /**
-     * ATTENTION: This was auto-generated to implement the App Indexing API.
-     * See https://g.co/AppIndexing/AndroidStudio for more information.
-     */
 
     /**
      * onCreate initializes the activity
@@ -48,16 +43,9 @@ public class GameActivity extends AppCompatActivity {
         Button button2 = (Button) findViewById(R.id.button2);
         Button button3 = (Button) findViewById(R.id.button3);
         Button button4 = (Button) findViewById(R.id.button4);
-        button4.setEnabled(false);
         button2.setEnabled(false);
         button3.setEnabled(false);
-
-        button4.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                game.setAction(1);
-            }
-        });
+        button4.setEnabled(false);
 
         button2.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -70,6 +58,13 @@ public class GameActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 game.setAction(2);
+            }
+        });
+
+        button4.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                game.setAction(1);
             }
         });
 
