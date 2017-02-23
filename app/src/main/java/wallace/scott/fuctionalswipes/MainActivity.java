@@ -1,5 +1,6 @@
 package wallace.scott.fuctionalswipes;
 
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -8,25 +9,41 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.appindexing.Thing;
+import com.google.android.gms.common.api.GoogleApiClient;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import static java.lang.Math.pow;
 import static java.lang.Math.random;
 
 /**
  * Author: Scott Wallace
  * This is the Activity that sets up and controls the game itself
- *
  */
 public class MainActivity extends AppCompatActivity {
 
     Button button;
+    Button button5;
     TextView screen;
     GameManager game;
     double speedUP = 1;
     double count = 0;
+    Thread gameMusicThread;
+    SoundThread sThread;
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    private GoogleApiClient client;
 
     /**
      * onCreate initializes the activity
      * Creates 4 onClickListeners for the 4 different buttons that can appear on screen
+     *
      * @param savedInstanceState
      */
     @Override
@@ -36,12 +53,16 @@ public class MainActivity extends AppCompatActivity {
         screen = (TextView) findViewById(R.id.TextField);
 
         button = (Button) findViewById(R.id.button);
+        button5 = (Button) findViewById(R.id.button5);
         Button button2 = (Button) findViewById(R.id.button2);
         Button button3 = (Button) findViewById(R.id.button3);
         Button button4 = (Button) findViewById(R.id.button4);
         button4.setEnabled(false);
         button2.setEnabled(false);
         button3.setEnabled(false);
+        //button5.setVisibility(View.INVISIBLE);
+
+        //sThread = new SoundThread(this, 1);
 
         button4.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -51,20 +72,30 @@ public class MainActivity extends AppCompatActivity {
         });
 
         button2.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    game.setAction(0);
-                }
+            @Override
+            public void onClick(View v) {
+                game.setAction(0);
+            }
         });
 
         button3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                    game.setAction(2);
+                game.setAction(2);
             }
         });
 
         button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                gameMusicThread = new Thread(new SoundThread(MainActivity.this,1));
+                gameMusicThread.start();
+                button5.performClick();
+            }
+        });
+
+        button5.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 game = new GameManager();
@@ -72,22 +103,64 @@ public class MainActivity extends AppCompatActivity {
                 game.execute();
             }
         });
+
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
     /**
      * Changes the value of the speedup factor. This is called to decrease the time limit on each
      * interaction in game
+     *
      * @param speed
      */
-    public void setSpeedUp(double speed){
-        speedUP = speedUP * pow(.98,speed);
+    public void setSpeedUp(double speed) {
+        speedUP = speedUP * pow(.98, speed);
     }
 
     /**
      * Resets the speedUP value to its initial value of 1
      */
-    public void resetSpeed(){
+    public void resetSpeed() {
         speedUP = 1;
+    }
+
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    public Action getIndexApiAction() {
+        Thing object = new Thing.Builder()
+                .setName("Main Page") // TODO: Define a title for the content shown.
+                // TODO: Make sure this auto-generated URL is correct.
+                .setUrl(Uri.parse("http://[ENTER-YOUR-URL-HERE]"))
+                .build();
+        return new Action.Builder(Action.TYPE_VIEW)
+                .setObject(object)
+                .setActionStatus(Action.STATUS_TYPE_COMPLETED)
+                .build();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client.connect();
+        AppIndex.AppIndexApi.start(client, getIndexApiAction());
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        AppIndex.AppIndexApi.end(client, getIndexApiAction());
+        client.disconnect();
     }
 
     /*
@@ -144,6 +217,7 @@ public class MainActivity extends AppCompatActivity {
 
         /**
          * changes the value of the  Boolean array (action) to represent a user action
+         *
          * @param choice
          */
         public void setAction(int choice) {
@@ -152,9 +226,10 @@ public class MainActivity extends AppCompatActivity {
 
         /**
          * Changes the speedUP factor for the game
+         *
          * @param counter
          */
-        public void setSpeed(double counter){
+        public void setSpeed(double counter) {
             speed = counter;
         }
 
@@ -169,8 +244,8 @@ public class MainActivity extends AppCompatActivity {
          */
         protected void onPreExecute() {
 
-            Log.i(functionalSwipes, "Iteration "+ speed);
-            for(int i=0;i<10;i++){
+            Log.i(functionalSwipes, "Iteration " + speed);
+            for (int i = 0; i < 10; i++) {
                 action[i] = false;
             }
 
@@ -213,11 +288,12 @@ public class MainActivity extends AppCompatActivity {
 
         /**
          * Tells the User what action to perform
+         *
          * @param currentAction
          */
-        private void ReportAction(int currentAction){
+        private void ReportAction(int currentAction) {
             String directions = "";
-            switch(currentAction){
+            switch (currentAction) {
                 case 0:
                     directions = "Please Swipe Down";
                     break;
@@ -256,20 +332,21 @@ public class MainActivity extends AppCompatActivity {
 
         /**
          * The game logic
+         *
          * @param params
          * @return returns Success if the user succeeds, and failure otherwise
          */
         protected String doInBackground(String... params) {
 
             long startTime = System.currentTimeMillis();
-            while(!action[currentAction] && (System.currentTimeMillis() - startTime) < 5000*speed){
-                for(int i=0;i<10;i++){
-                    if(action[i] && i!=currentAction){
+            while (!action[currentAction] && (System.currentTimeMillis() - startTime) < 5000 * speed) {
+                for (int i = 0; i < 10; i++) {
+                    if (action[i] && i != currentAction) {
                         return "Failure";
                     }
                 }
             }
-            if(action[currentAction]) {
+            if (action[currentAction]) {
                 return "Success";
             }
             return "Time Out";
@@ -277,6 +354,7 @@ public class MainActivity extends AppCompatActivity {
 
         /**
          * returns the screen to how it was before the game was launched
+         *
          * @param result
          */
         @Override
@@ -292,14 +370,16 @@ public class MainActivity extends AppCompatActivity {
             button3.setVisibility(View.INVISIBLE);
             button.setText(result);
 
-            if(result.equals("Success")){
-                Log.i(functionalSwipes, "new Game");
+            if (result.equals("Success")) {
+                Log.i(functionalSwipes, "Next Level");
                 count++;
                 setSpeedUp(count);
-                button.performClick();
-            }
-            else {
+                button5.performClick();
+            } else {
+                gameMusicThread.interrupt();
                 count = 0;
+                Thread thread = new Thread(new SoundThread(MainActivity.this, 2));
+                thread.start();
                 resetSpeed();
             }
         }
