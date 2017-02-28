@@ -1,5 +1,4 @@
 <resources>
-    <string name="appbar_scrolling_view_behavior"></string>
     <string name="app_name">BopIt</string>
     <string name="play_button">Play Game</string>
     <string name="highscores_button">Top Scores</string>
