@@ -42,6 +42,7 @@ public class GameActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
+
         mDetector = new GestureDetectorCompat(this, new MyGestureListener());
         trackPad = (TextView) findViewById(R.id.trackPad);
         trackPad.setOnTouchListener(new View.OnTouchListener() {
@@ -50,6 +51,7 @@ public class GameActivity extends AppCompatActivity {
                 return mDetector.onTouchEvent(event);
             }
         });
+
         screen = (TextView) findViewById(R.id.TextField);
         scoreView = (TextView) findViewById(R.id.scoreView);
         scoreView.setText("Score: 0" );
@@ -64,9 +66,11 @@ public class GameActivity extends AppCompatActivity {
             }
         });
     }
+
     public void addToScore(){
         scoreView.setText("Score: " + ++score);
     }
+
     public void setAction(int choice){
         game.setAction(choice);
     }
@@ -86,42 +90,6 @@ public class GameActivity extends AppCompatActivity {
     public void resetSpeed(){
         speedUP = 1;
     }
-
-    /*
-    @Override
-    public boolean onTouchEvent(MotionEvent event){
-
-        int action = MotionEventCompat.getActionMasked(event);
-
-        switch(action) {
-            case (MotionEvent.ACTION_DOWN) :
-                Log.d(functionalSwipes,"Action was DOWN");
-                swipes(5);
-                screen.setText("down Swipe");
-                return true;
-            case (MotionEvent.ACTION_MOVE) :
-                Log.d(functionalSwipes,"Action was MOVE");
-                swipes(10);
-                screen.setText("Move Swipe");
-                return true;
-            case (MotionEvent.ACTION_UP) :
-                Log.d(functionalSwipes,"Action was UP");
-                screen.setText("Up Swipe");
-                swipes(15);
-                return true;
-            case (MotionEvent.ACTION_CANCEL) :
-                Log.d(functionalSwipes,"Action was CANCEL");
-                swipes(20);
-                return true;
-            case (MotionEvent.ACTION_OUTSIDE) :
-                Log.d(functionalSwipes,"Movement occurred outside bounds " +
-                        "of current screen element");
-                swipes(25);
-                return true;
-            default :
-                return super.onTouchEvent(event);
-        }
-    }*/
 
     /**
      * This is the AsycTask that handles the game logic
@@ -181,7 +149,6 @@ public class GameActivity extends AppCompatActivity {
 
             text.setText("");
 
-
             double currVal;
             Log.i(functionalSwipes, "Entered GameController");
             currVal = random();
@@ -237,16 +204,7 @@ public class GameActivity extends AppCompatActivity {
                     break;
                 case 9:
                     break;
-            }/*
-            if(currentAction==0){
-                directions = "Please Swipe Down";
             }
-            else if(currentAction==1){
-                directions = "Please Swipe Up";
-            }
-            else if(currentAction==2){
-                directions = "Please Tap";
-            }*/
             text.setText(directions);
         }
 

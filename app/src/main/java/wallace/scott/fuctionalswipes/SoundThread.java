@@ -1,0 +1,66 @@
+package wallace.scott.fuctionalswipes;
+
+import android.content.Context;
+import android.content.res.AssetFileDescriptor;
+import android.media.AudioAttributes;
+import android.media.MediaPlayer;
+import android.media.SoundPool;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
+import android.util.Log;
+
+import static java.lang.Thread.currentThread;
+import static java.lang.Thread.sleep;
+
+/**
+ * Created by Scott on 2017-02-22.
+ */
+
+public class SoundThread implements Runnable {
+
+    private MediaPlayer mPlayer;
+    private final String TAG = "TAG";
+    private Context context;
+    private int choice;
+
+    public SoundThread(Context mContext, int sound){
+        context = mContext;
+        choice = sound;
+    }
+
+    public void run(){
+
+        mPlayer = new MediaPlayer();
+
+        switch(choice) {
+            case 0:
+                //mPlayer = MediaPlayer.create(context, R.raw.intro_mus);
+                break;
+            case 1:
+                //mPlayer = MediaPlayer.create(context, R.raw.one_way);
+                break;
+            case 2:
+               // mPlayer = MediaPlayer.create(context, R.raw.game_over1);
+                break;
+        }
+
+        mPlayer.start();
+
+        try {
+            currentThread().sleep(100);
+        } catch (Exception e){
+            Log.i("Sleep Error", "Throw Sleep Error Exception");
+        }
+
+        while(!Thread.currentThread().isInterrupted() && mPlayer.isPlaying()){
+
+        }
+
+        if(mPlayer.isPlaying()) {
+            mPlayer.stop();
+        }
+
+        mPlayer.reset();
+        mPlayer.release();
+    }
+}
