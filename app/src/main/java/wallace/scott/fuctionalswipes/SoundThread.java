@@ -13,7 +13,7 @@ import static java.lang.Thread.currentThread;
 import static java.lang.Thread.sleep;
 
 /**
- * Created by Scott on 2017-02-22.
+ * Author: Scott Wallace and Maxime Thibodeau
  */
 
 public class SoundThread implements Runnable {
@@ -22,10 +22,12 @@ public class SoundThread implements Runnable {
     private final String TAG = "TAG";
     private Context context;
     private int choice;
+    int seekto;
 
-    public SoundThread(Context mContext, int sound){
+    public SoundThread(Context mContext, int sound, int position){
         context = mContext;
         choice = sound;
+        seekto = position;
     }
 
     public void run(){
@@ -44,7 +46,14 @@ public class SoundThread implements Runnable {
                 break;
         }
 
-        mPlayer.start();
+        mPlayer.seekTo(seekto);
+        mPlayer.setOnSeekCompleteListener(new MediaPlayer.OnSeekCompleteListener() {
+            @Override
+            public void onSeekComplete(MediaPlayer mp) {
+                mPlayer.start();
+            }
+        });
+
 
         try {
             currentThread().sleep(100);

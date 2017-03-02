@@ -80,8 +80,16 @@ public class GameActivity extends AppCompatActivity {
      * interaction in game
      * @param speed
      */
+    // Count is there for timing algorithm changes
+    //we could hard code for better efficiency
     public void setSpeedUp(double speed){
-        speedUP = speedUP * pow(.98,speed);
+        int count = 30;
+        if(speed <=count){
+            speedUP = pow(.97,speed);
+        }
+        else{
+            speedUP = pow(.97,count)*pow(.995, speed-count);
+        }
     }
 
     /**
