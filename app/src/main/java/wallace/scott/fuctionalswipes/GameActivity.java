@@ -1,6 +1,10 @@
 package wallace.scott.fuctionalswipes;
 
+import android.content.Intent;
+import android.hardware.Sensor;
+import android.hardware.SensorManager;
 import android.os.AsyncTask;
+import android.os.IBinder;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -30,8 +34,8 @@ public class GameActivity extends AppCompatActivity {
     int status = 0;
     int score = 0;
     GameManager game;
-    double speedUP = 1;
-    double count = 0;
+    double speedUp = 1;
+    int round = 0;
 
     /**
      * onCreate initializes the activity
@@ -56,15 +60,18 @@ public class GameActivity extends AppCompatActivity {
         scoreView = (TextView) findViewById(R.id.scoreView);
         scoreView.setText("Score: 0" );
         button = (Button) findViewById(R.id.button);
+        button.setVisibility(View.INVISIBLE);
 
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 game = new GameManager();
-                game.setSpeed(speedUP);
+                game.setSpeedUp(speedUp);
                 game.execute();
             }
         });
+
+        button.performClick();
     }
 
     public void addToScore(){
@@ -82,13 +89,13 @@ public class GameActivity extends AppCompatActivity {
      */
     // Count is there for timing algorithm changes
     //we could hard code for better efficiency
-    public void setSpeedUp(double speed){
+    public void setSpeedUp(int speed){
         int count = 30;
         if(speed <=count){
-            speedUP = pow(.97,speed);
+            speedUp = pow(.97,speed);
         }
         else{
-            speedUP = pow(.97,count)*pow(.995, speed-count);
+            speedUp = pow(.97,count)*pow(.995, speed-count);
         }
     }
 
@@ -96,7 +103,7 @@ public class GameActivity extends AppCompatActivity {
      * Resets the speedUP value to its initial value of 1
      */
     public void resetSpeed(){
-        speedUP = 1;
+        speedUp = 1;
     }
 
     /**
@@ -104,10 +111,12 @@ public class GameActivity extends AppCompatActivity {
      */
     public class GameManager extends AsyncTask<String, Void, String> {
 
+        SoundThread playSound;
         private double speed;
         private final String functionalSwipes = "Swipes";
         private int currentAction;
         private Boolean action[] = new Boolean[10];
+        private Thread thread;
 
         Button button = (Button) findViewById(R.id.button);
         TextView text = (TextView) findViewById(R.id.TextField);
@@ -122,10 +131,10 @@ public class GameActivity extends AppCompatActivity {
 
         /**
          * Changes the speedUP factor for the game
-         * @param counter
+         * @param SpeedUp
          */
-        public void setSpeed(double counter){
-            speed = counter;
+        public void setSpeedUp(double SpeedUp){
+            speed = SpeedUp;
         }
 
         public void updateScore(){
@@ -146,6 +155,10 @@ public class GameActivity extends AppCompatActivity {
          * And set a text box on the screen to tell what action needs to be performed
          */
         protected void onPreExecute() {
+
+            playSound = new SoundThread(getApplicationContext(),1, round);
+            thread = new Thread(playSound);
+            thread.start();
 
             Log.i(functionalSwipes, "Iteration "+ speed);
             for(int i=0;i<10;i++){
@@ -250,15 +263,16 @@ public class GameActivity extends AppCompatActivity {
             button.setVisibility(View.VISIBLE);
 
             button.setText(result);
+            thread.interrupt();
 
             if (result.equals("Success")) {
                 Log.i(functionalSwipes, "new Game");
-                count++;
+                round++;
                 addToScore();
-                setSpeedUp(count);
+                setSpeedUp(round);
                 button.performClick();
             } else {
-                count = 0;
+                round = 0;
                 resetSpeed();
             }
         }

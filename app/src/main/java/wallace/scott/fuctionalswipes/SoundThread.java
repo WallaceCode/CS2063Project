@@ -22,15 +22,17 @@ public class SoundThread implements Runnable {
     private final String TAG = "TAG";
     private Context context;
     private int choice;
-    int seekto;
+    private int seekTo;
 
     public SoundThread(Context mContext, int sound, int position){
         context = mContext;
         choice = sound;
-        seekto = position;
+        seekTo = position*5000;
     }
 
     public void run(){
+
+      //seekTo = 50000;
 
         mPlayer = new MediaPlayer();
 
@@ -39,18 +41,18 @@ public class SoundThread implements Runnable {
                 //mPlayer = MediaPlayer.create(context, R.raw.intro_mus);
                 break;
             case 1:
-                //mPlayer = MediaPlayer.create(context, R.raw.one_way);
+                mPlayer = MediaPlayer.create(context, R.raw.one_way);
                 break;
             case 2:
                // mPlayer = MediaPlayer.create(context, R.raw.game_over1);
                 break;
         }
 
-        mPlayer.seekTo(seekto);
+        mPlayer.seekTo(seekTo);
         mPlayer.setOnSeekCompleteListener(new MediaPlayer.OnSeekCompleteListener() {
             @Override
             public void onSeekComplete(MediaPlayer mp) {
-                mPlayer.start();
+                mp.start();
             }
         });
 
