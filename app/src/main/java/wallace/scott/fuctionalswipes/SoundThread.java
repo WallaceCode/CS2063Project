@@ -32,7 +32,9 @@ public class SoundThread implements Runnable {
 
     public void run(){
 
-      //seekTo = 50000;
+        if(choice == 2) {
+            seekTo = 100;
+        }
 
         mPlayer = new MediaPlayer();
 
@@ -44,7 +46,7 @@ public class SoundThread implements Runnable {
                 mPlayer = MediaPlayer.create(context, R.raw.one_way);
                 break;
             case 2:
-               // mPlayer = MediaPlayer.create(context, R.raw.game_over1);
+               mPlayer = MediaPlayer.create(context, R.raw.game_over1);
                 break;
         }
 

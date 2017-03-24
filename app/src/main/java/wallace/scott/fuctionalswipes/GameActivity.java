@@ -26,6 +26,7 @@ import static java.lang.Math.random;
 public class GameActivity extends AppCompatActivity {
 
     String DEBUG_TAG = "";
+    Thread GameOver;
     private GestureDetectorCompat mDetector;
     Button button;
     TextView screen;
@@ -56,6 +57,7 @@ public class GameActivity extends AppCompatActivity {
             }
         });
 
+        GameOver = new Thread(new SoundThread(getApplicationContext(),2, 0));
         screen = (TextView) findViewById(R.id.TextField);
         scoreView = (TextView) findViewById(R.id.scoreView);
         scoreView.setText("Score: 0" );
@@ -104,6 +106,10 @@ public class GameActivity extends AppCompatActivity {
      */
     public void resetSpeed(){
         speedUp = 1;
+    }
+
+    public void gameOver(){
+        GameOver.start();
     }
 
     /**
@@ -156,6 +162,9 @@ public class GameActivity extends AppCompatActivity {
          */
         protected void onPreExecute() {
 
+            if(GameOver.isAlive()){
+                GameOver.interrupt();
+            }
             playSound = new SoundThread(getApplicationContext(),1, round);
             thread = new Thread(playSound);
             thread.start();
@@ -273,6 +282,7 @@ public class GameActivity extends AppCompatActivity {
                 button.performClick();
             } else {
                 round = 0;
+                gameOver();
                 resetSpeed();
             }
         }
