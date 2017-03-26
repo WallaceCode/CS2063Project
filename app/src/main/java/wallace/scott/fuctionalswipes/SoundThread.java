@@ -3,12 +3,14 @@ package wallace.scott.fuctionalswipes;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.media.AudioAttributes;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.SoundPool;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 import android.util.Log;
 
+import static android.content.Context.AUDIO_SERVICE;
 import static java.lang.Thread.currentThread;
 import static java.lang.Thread.sleep;
 

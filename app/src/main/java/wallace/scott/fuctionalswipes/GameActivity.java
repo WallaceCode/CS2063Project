@@ -26,7 +26,8 @@ import static java.lang.Math.random;
 public class GameActivity extends AppCompatActivity {
 
     String DEBUG_TAG = "";
-    Thread GameOver;
+    private Thread GameOver;
+    private Thread GameMusic;
     private GestureDetectorCompat mDetector;
     Button button;
     TextView screen;
@@ -76,6 +77,18 @@ public class GameActivity extends AppCompatActivity {
         button.performClick();
     }
 
+    @Override
+    protected void onPause(){
+        super.onPause();
+
+        if(GameMusic.isAlive()) {
+            GameMusic.interrupt();
+        }
+        if(GameOver.isAlive()){
+            GameOver.interrupt();
+        }
+    }
+
     public void addToScore(){
         scoreView.setText("Score: " + ++score);
     }
@@ -122,7 +135,6 @@ public class GameActivity extends AppCompatActivity {
         private final String functionalSwipes = "Swipes";
         private int currentAction;
         private Boolean action[] = new Boolean[10];
-        private Thread thread;
 
         Button button = (Button) findViewById(R.id.button);
         TextView text = (TextView) findViewById(R.id.TextField);
@@ -166,8 +178,8 @@ public class GameActivity extends AppCompatActivity {
                 GameOver.interrupt();
             }
             playSound = new SoundThread(getApplicationContext(),1, round);
-            thread = new Thread(playSound);
-            thread.start();
+            GameMusic = new Thread(playSound);
+            GameMusic.start();
 
             Log.i(functionalSwipes, "Iteration "+ speed);
             for(int i=0;i<10;i++){
@@ -269,10 +281,9 @@ public class GameActivity extends AppCompatActivity {
         protected void onPostExecute(String result) {
 
             button.setEnabled(true);
-            button.setVisibility(View.VISIBLE);
 
-            button.setText(result);
-            thread.interrupt();
+            text.setText(result);
+            GameMusic.interrupt();
 
             if (result.equals("Success")) {
                 Log.i(functionalSwipes, "new Game");
@@ -281,6 +292,8 @@ public class GameActivity extends AppCompatActivity {
                 setSpeedUp(round);
                 button.performClick();
             } else {
+                button.setVisibility(View.VISIBLE);
+                button.setText("Play Again?");
                 round = 0;
                 gameOver();
                 resetSpeed();
