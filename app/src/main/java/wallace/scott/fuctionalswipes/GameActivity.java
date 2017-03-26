@@ -30,6 +30,7 @@ public class GameActivity extends AppCompatActivity {
     private Thread GameMusic;
     private GestureDetectorCompat mDetector;
     Button button;
+    private static baseList base;
     TextView screen;
     TextView scoreView;
     TextView trackPad;
@@ -87,6 +88,8 @@ public class GameActivity extends AppCompatActivity {
         if(GameOver.isAlive()){
             GameOver.interrupt();
         }
+
+        MainActivity.updateBase(base);
     }
 
     public void addToScore(){
@@ -294,12 +297,29 @@ public class GameActivity extends AppCompatActivity {
             } else {
                 button.setVisibility(View.VISIBLE);
                 button.setText("Play Again?");
+                CheckIfRecord(round);
                 round = 0;
                 gameOver();
                 resetSpeed();
             }
         }
     }
+
+    /**
+     * If the score happens to be better than the 10th best score, add this score to the highScores.
+     * @param record
+     */
+    private void CheckIfRecord(int record) {
+        HighScores highScores = new HighScores();
+        String name = "Scott";
+        highScores.updateBase(base);
+        highScores.addRecord(name, record);
+    }
+
+    public static void updateBase(baseList list){
+        base = list;
+    }
+
     //Added by Max
     class MyGestureListener extends GestureDetector.SimpleOnGestureListener {
         private static final String DEBUG_TAG = "Gestures";

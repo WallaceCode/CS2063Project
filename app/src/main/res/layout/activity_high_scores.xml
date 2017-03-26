@@ -28,18 +28,7 @@
         <Space
             android:layout_width="200dp"
             android:layout_height="70dp" />
-        <EditText
-            android:id="@+id/txtinput"
-            android:layout_width="200dp"
-            android:layout_height="wrap_content"
-            tools:text="Input Here"
-            android:hint="Input Text Here" />
-        <Button
-            android:id="@+id/btadd"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="add"
-            android:layout_toRightOf="@+id/txtinput"/>
+
         <ListView
             android:id="@+id/scorelistview"
             android:layout_width="match_parent"

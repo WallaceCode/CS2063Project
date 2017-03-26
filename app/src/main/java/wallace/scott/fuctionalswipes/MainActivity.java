@@ -9,6 +9,7 @@ import android.view.View;
 
 public class MainActivity extends AppCompatActivity {
 
+    static baseList list;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -16,6 +17,7 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        list = new baseList();
 
         Button plybtn = (Button) findViewById(R.id.playbtn);
         plybtn.setOnClickListener(new View.OnClickListener() {
@@ -23,6 +25,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Intent intent = new Intent(MainActivity.this, GameActivity.class);
                 startActivity(intent);
+                GameActivity.updateBase(list);
             }
         });
         Button highscrbtn = (Button) findViewById(R.id.highscoresbtn);
@@ -31,9 +34,13 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Intent intent = new Intent(MainActivity.this, HighScores.class);
                 startActivity(intent);
+                HighScores.updateBase(list);
             }
         });
 
     }
 
+    public static void updateBase(baseList base){
+        list = base;
+    }
 }

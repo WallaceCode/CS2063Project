@@ -16,7 +16,7 @@ import java.util.Arrays;
 
 public class HighScores extends AppCompatActivity {
 
-    private ArrayList<String> arraylist;
+    private static baseList baseList;
     private ArrayAdapter<String> adapter;
     private EditText txtInput;
 
@@ -26,24 +26,48 @@ public class HighScores extends AppCompatActivity {
         setContentView(R.layout.activity_high_scores);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        updateScreen();
+    }
 
+    public static void updateBase(baseList list){
+        baseList = list;
+    }
+
+    public boolean addRecord(String player, int score){
+
+        int rank = findPosition(score);
+        String[] newPlayer = {Integer.toString(rank), Integer.toString(score), player};
+        baseList.addToList(rank, newPlayer);
+        //updateScreen();
+        return true;
+    }
+
+    private void updateScreen(){
+        ArrayList<String> arrayList = new ArrayList<>();
+        String placeHolder;
+        int i=0;
+        while(baseList.getSize()>i){
+            placeHolder = baseList.getItem(i)[0];
+            placeHolder += " , ";
+            placeHolder += baseList.getItem(i)[1];
+            placeHolder += " , ";
+            placeHolder += baseList.getItem(i)[2];
+            arrayList.add(placeHolder);
+            i++;
+        }
         ListView listview = (ListView)findViewById(R.id.scorelistview);
-        String[] items = {"Rank","Score","Player Name"};
-        arraylist = new ArrayList<>(Arrays.asList(items));
-        adapter = new ArrayAdapter<String>(this,R.layout.list_item,R.id.txtitem,arraylist);
+        adapter = new ArrayAdapter<String>(this,R.layout.list_item,R.id.txtitem,arrayList);
         listview.setAdapter(adapter);
-        txtInput=(EditText)findViewById(R.id.txtinput);
-        Button btAdd = (Button)findViewById(R.id.btadd);
-        btAdd.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String newItem = txtInput.getText().toString();
-                arraylist.add(newItem);
-                adapter.notifyDataSetChanged();
-            }
-        });
+    }
 
-
+    public int findPosition(int score){
+        int rank = Integer.MAX_VALUE;
+        int i = 1;
+        while(baseList.getSize()>i && Integer.parseInt(baseList.getItem(i)[1])>=score){
+            i++;
+        }
+        rank = i;
+        return rank;
     }
 
 }
