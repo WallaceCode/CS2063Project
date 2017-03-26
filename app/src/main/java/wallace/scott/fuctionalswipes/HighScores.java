@@ -29,7 +29,7 @@ public class HighScores extends AppCompatActivity {
         updateScreen();
     }
 
-    public static void updateBase(baseList list){
+    public static void setBaseList(baseList list){
         baseList = list;
     }
 

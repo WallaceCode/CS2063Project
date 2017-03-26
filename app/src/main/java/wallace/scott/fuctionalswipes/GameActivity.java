@@ -88,8 +88,6 @@ public class GameActivity extends AppCompatActivity {
         if(GameOver.isAlive()){
             GameOver.interrupt();
         }
-
-        MainActivity.updateBase(base);
     }
 
     public void addToScore(){
@@ -312,7 +310,6 @@ public class GameActivity extends AppCompatActivity {
     private void CheckIfRecord(int record) {
         HighScores highScores = new HighScores();
         String name = "Scott";
-        highScores.updateBase(base);
         highScores.addRecord(name, record);
     }
 

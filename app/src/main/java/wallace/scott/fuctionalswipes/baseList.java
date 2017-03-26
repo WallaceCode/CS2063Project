@@ -7,7 +7,7 @@ import java.util.ArrayList;
  */
 
 public class baseList {
-    private ArrayList<String[]> list;
+    private static ArrayList<String[]> list;
 
     public baseList(){
         String[] temp = {"Rank","Score","Player Name"};
