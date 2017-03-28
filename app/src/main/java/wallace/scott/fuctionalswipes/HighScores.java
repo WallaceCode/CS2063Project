@@ -36,7 +36,7 @@ public class HighScores extends AppCompatActivity {
     public boolean addRecord(String player, int score){
 
         int rank = findPosition(score);
-        String[] newPlayer = {Integer.toString(rank), Integer.toString(score), player};
+        String[] newPlayer = {Integer.toString(score), player};
         baseList.addToList(rank, newPlayer);
         //updateScreen();
         return true;
@@ -46,12 +46,20 @@ public class HighScores extends AppCompatActivity {
         ArrayList<String> arrayList = new ArrayList<>();
         String placeHolder;
         int i=0;
+
         while(baseList.getSize()>i){
             placeHolder = baseList.getItem(i)[0];
             placeHolder += " , ";
             placeHolder += baseList.getItem(i)[1];
-            placeHolder += " , ";
-            placeHolder += baseList.getItem(i)[2];
+            if(i==0) {
+                placeHolder += " , ";
+                placeHolder += baseList.getItem(i)[2];
+            }
+            else{
+                String temp = placeHolder;
+                placeHolder = Integer.toString(i) + " , ";
+                placeHolder += temp;
+            }
             arrayList.add(placeHolder);
             i++;
         }
@@ -63,7 +71,7 @@ public class HighScores extends AppCompatActivity {
     public int findPosition(int score){
         int rank = Integer.MAX_VALUE;
         int i = 1;
-        while(baseList.getSize()>i && Integer.parseInt(baseList.getItem(i)[1])>=score){
+        while(baseList.getSize()>i && Integer.parseInt(baseList.getItem(i)[0])>=score){
             i++;
         }
         rank = i;
