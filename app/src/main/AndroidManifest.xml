@@ -10,13 +10,15 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".GameActivity"
-            android:parentActivityName=".MainActivity">
+            android:parentActivityName=".MainActivity"
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
         </activity>
         <activity
             android:name=".MainActivity"
+            android:screenOrientation="portrait"
             android:label="@string/title_activity_menu"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
@@ -27,6 +29,7 @@
         </activity>
         <activity
             android:name=".HighScores"
+            android:screenOrientation="portrait"
             android:parentActivityName=".MainActivity"
             android:label="@string/title_activity_high_scores"
             android:theme="@style/AppTheme.NoActionBar"></activity>

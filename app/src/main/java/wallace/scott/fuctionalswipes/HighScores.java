@@ -5,18 +5,28 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 
 public class HighScores extends AppCompatActivity {
 
+
     private static baseList baseList;
+    String TAG = "Max, look here ----> ";
+    private ArrayList<String> arraylist;
     private ArrayAdapter<String> adapter;
     private EditText txtInput;
 
@@ -29,11 +39,11 @@ public class HighScores extends AppCompatActivity {
         updateScreen();
     }
 
-    public static void setBaseList(baseList list){
+    public static void setBaseList(baseList list) {
         baseList = list;
     }
 
-    public boolean addRecord(String player, int score){
+    public boolean addRecord(String player, int score) {
 
         int rank = findPosition(score);
         String[] newPlayer = {Integer.toString(score), player};
@@ -42,20 +52,19 @@ public class HighScores extends AppCompatActivity {
         return true;
     }
 
-    private void updateScreen(){
+    private void updateScreen() {
         ArrayList<String> arrayList = new ArrayList<>();
         String placeHolder;
-        int i=0;
+        int i = 0;
 
-        while(baseList.getSize()>i){
+        while (baseList.getSize() > i) {
             placeHolder = baseList.getItem(i)[0];
             placeHolder += " , ";
             placeHolder += baseList.getItem(i)[1];
-            if(i==0) {
+            if (i == 0) {
                 placeHolder += " , ";
                 placeHolder += baseList.getItem(i)[2];
-            }
-            else{
+            } else {
                 String temp = placeHolder;
                 placeHolder = Integer.toString(i) + " , ";
                 placeHolder += temp;
@@ -63,9 +72,44 @@ public class HighScores extends AppCompatActivity {
             arrayList.add(placeHolder);
             i++;
         }
-        ListView listview = (ListView)findViewById(R.id.scorelistview);
-        adapter = new ArrayAdapter<String>(this,R.layout.list_item,R.id.txtitem,arrayList);
+        ListView listview = (ListView) findViewById(R.id.scorelistview);
+        adapter = new ArrayAdapter<String>(this, R.layout.list_item, R.id.txtitem, arrayList);
         listview.setAdapter(adapter);
+
+
+        txtInput = (EditText)findViewById(R.id.txtinput);
+        Button btAdd = (Button)findViewById(R.id.btadd);
+        btAdd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String newItem = txtInput.getText().toString();
+
+                // Write a message to the database
+                FirebaseDatabase database = FirebaseDatabase.getInstance();
+                DatabaseReference myRef = database.getReference("message");
+
+                myRef.setValue(newItem);
+
+                // Read from the database
+                myRef.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        // This method is called once with the initial value and again
+                        // whenever data at this location is updated.
+                        String value = dataSnapshot.getValue(String.class);
+                        Log.d(TAG, "Value is: " + value);
+                        arraylist.add(value);
+                        adapter.notifyDataSetChanged();
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError error) {
+                        // Failed to read value
+                        Log.w(TAG, "Failed to read value.", error.toException());
+                    }
+                });
+            }
+        });
     }
 
     public int findPosition(int score){

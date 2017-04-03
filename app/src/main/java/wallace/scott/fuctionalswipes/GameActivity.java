@@ -1,13 +1,12 @@
 package wallace.scott.fuctionalswipes;
 
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.hardware.Sensor;
-import android.hardware.SensorManager;
+import android.content.Context;
+import android.media.AudioAttributes;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
+import android.media.SoundPool;
 import android.os.AsyncTask;
-import android.os.IBinder;
 import android.support.v4.view.GestureDetectorCompat;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -15,8 +14,13 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import static java.lang.Math.pow;
 import static java.lang.Math.random;
@@ -27,21 +31,23 @@ import static java.lang.Math.random;
  *
  */
 public class GameActivity extends AppCompatActivity {
-
-    String DEBUG_TAG = "";
-    private Thread GameOver;
-    private Thread GameMusic;
+    String TAG = "";
     private GestureDetectorCompat mDetector;
     Button button;
-    private static baseList base;
     TextView screen;
     TextView scoreView;
     TextView trackPad;
     int status = 0;
     int score = 0;
     GameManager game;
-    double speedUp = 1;
-    int round = 0;
+    double speedUP = 1;
+    double count = 0;
+    private SoundPool mSoundPool;
+    private int mSoundId;
+    private int mSoundId2;
+    MediaPlayer mPlayer;
+    ImageView visualPromt;
+    int sessionTopScore = 0;
 
     /**
      * onCreate initializes the activity
@@ -53,6 +59,8 @@ public class GameActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
 
+        startMusic();
+
         mDetector = new GestureDetectorCompat(this, new MyGestureListener());
         trackPad = (TextView) findViewById(R.id.trackPad);
         trackPad.setOnTouchListener(new View.OnTouchListener() {
@@ -62,39 +70,59 @@ public class GameActivity extends AppCompatActivity {
             }
         });
 
-        GameOver = new Thread(new SoundThread(getApplicationContext(),2, 0));
         screen = (TextView) findViewById(R.id.TextField);
         scoreView = (TextView) findViewById(R.id.scoreView);
-        scoreView.setText("Score: 0" );
+        visualPromt = (ImageView) findViewById(R.id.imageView);
+        visualPromt.setVisibility(View.INVISIBLE);
+        scoreView.setText("Score: 0");
         button = (Button) findViewById(R.id.button);
-        button.setVisibility(View.INVISIBLE);
 
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(button.getText().equals("Failure")||button.getText().equals("Time Out")){
+                    startMusic();
+                }
+                if(button.getText().equals("Go!")){
+                    visualPromt.setVisibility(View.VISIBLE);
+                }
                 game = new GameManager();
-                game.setSpeedUp(speedUp);
+                game.setSpeed(speedUP);
                 game.execute();
             }
         });
 
-        button.performClick();
-    }
+        Context context = this;
 
-    @Override
-    protected void onPause(){
-        super.onPause();
+        AudioManager manager = (AudioManager)context.getSystemService(Context.AUDIO_SERVICE);
+        // Create a SoundPool
+        SoundPool.Builder spb = new SoundPool.Builder();
+        spb.setMaxStreams(1);
+        spb.setAudioAttributes(new AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_MEDIA)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .build());
+        mSoundPool = spb.build();
 
-        if(GameMusic.isAlive()) {
-            GameMusic.interrupt();
+        // In Lab 7 we will be working with an older API level and will use this instead
+        // of a SoundPool.Builder to create the SoundPool appropriately
+        //mSoundPool = new SoundPool(10, AudioManager.STREAM_MUSIC, 0);
+
+        // Load a bubble popping sound.
+        // See further documentation on SoundPool.play here:
+        // http://developer.android.com/reference/android/media/SoundPool.html
+        mSoundId = mSoundPool.load(this, R.raw.bubble_pop, 2);
+
+        if(mSoundId == mSoundId2){
+            Log.d("ID Prob","Sound IDs intersect");
         }
-        if(GameOver.isAlive()){
-            GameOver.interrupt();
-        }
+
     }
 
     public void addToScore(){
         scoreView.setText("Score: " + ++score);
+        if(score > sessionTopScore)
+            sessionTopScore = score;
     }
 
     public void setAction(int choice){
@@ -106,27 +134,27 @@ public class GameActivity extends AppCompatActivity {
      * interaction in game
      * @param speed
      */
+
+
     // Count is there for timing algorithm changes
     //we could hard code for better efficiency
-    public void setSpeedUp(int speed){
+    public void setSpeedUp(double speed){
         int count = 30;
         if(speed <=count){
-            speedUp = pow(.97,speed);
+            speedUP = pow(.97,speed);
         }
         else{
-            speedUp = pow(.97,count)*pow(.995, speed-count);
+            speedUP = pow(.97,count)*pow(.995, speed-count);
         }
+        speedUP = speedUP * .99;
+
     }
 
     /**
      * Resets the speedUP value to its initial value of 1
      */
     public void resetSpeed(){
-        speedUp = 1;
-    }
-
-    public void gameOver(){
-        GameOver.start();
+        speedUP = 1;
     }
 
     /**
@@ -134,7 +162,7 @@ public class GameActivity extends AppCompatActivity {
      */
     public class GameManager extends AsyncTask<String, Void, String> {
 
-        SoundThread playSound;
+        Double rate = 1.0;
         private double speed;
         private final String functionalSwipes = "Swipes";
         private int currentAction;
@@ -142,6 +170,7 @@ public class GameActivity extends AppCompatActivity {
 
         Button button = (Button) findViewById(R.id.button);
         TextView text = (TextView) findViewById(R.id.TextField);
+        ImageView visualPromt = (ImageView) findViewById(R.id.imageView);
 
         /**
          * changes the value of the  Boolean array (action) to represent a user action
@@ -153,10 +182,10 @@ public class GameActivity extends AppCompatActivity {
 
         /**
          * Changes the speedUP factor for the game
-         * @param SpeedUp
+         * @param counter
          */
-        public void setSpeedUp(double SpeedUp){
-            speed = SpeedUp;
+        public void setSpeed(double counter){
+            speed = counter;
         }
 
         public void updateScore(){
@@ -165,6 +194,12 @@ public class GameActivity extends AppCompatActivity {
 
         public void resetScore(){
             score = 0;
+        }
+        public void soundSpeedUp(){
+            rate = rate + .1;
+            mSoundPool.pause(mSoundId2);
+            mSoundPool.setRate(mSoundId2,rate.floatValue());
+            mSoundPool.resume(mSoundId2);
         }
 
         /**
@@ -177,14 +212,6 @@ public class GameActivity extends AppCompatActivity {
          * And set a text box on the screen to tell what action needs to be performed
          */
         protected void onPreExecute() {
-
-            if(GameOver.isAlive()){
-                GameOver.interrupt();
-            }
-            playSound = new SoundThread(getApplicationContext(),1, round);
-            GameMusic = new Thread(playSound);
-            GameMusic.start();
-
             Log.i(functionalSwipes, "Iteration "+ speed);
             for(int i=0;i<10;i++){
                 action[i] = false;
@@ -192,8 +219,9 @@ public class GameActivity extends AppCompatActivity {
 
             button.setEnabled(false);
             button.setVisibility(View.INVISIBLE);
+            visualPromt.setVisibility(View.VISIBLE);
 
-            text.setText("");
+            mSoundPool.play(mSoundId2,1,1,3,-1,1);
 
             double currVal;
             Log.i(functionalSwipes, "Entered GameController");
@@ -201,18 +229,23 @@ public class GameActivity extends AppCompatActivity {
             Log.i(functionalSwipes, Double.toString(currVal));
             if (0 <= currVal && currVal < 0.2) {
                 currentAction = 0;
+                visualPromt.setImageResource(R.drawable.tap);
                 Log.i(functionalSwipes, "Tap");
             } else if (0.2 <= currVal && currVal < 0.4) {
                 currentAction = 1;
+                visualPromt.setImageResource(R.drawable.up);
                 Log.i(functionalSwipes, "Swipe Up");
             } else if (0.4 <= currVal && currVal < 0.6) {
                 currentAction = 2;
+                visualPromt.setImageResource(R.drawable.down);
                 Log.i(functionalSwipes, "Swipe Down");
             } else if (0.6 <= currVal && currVal < 0.8) {
                 currentAction = 3;
+                visualPromt.setImageResource(R.drawable.left);
                 Log.i(functionalSwipes, "Swipe Left");
             } else if (0.8 <= currVal) {
                 currentAction = 4;
+                visualPromt.setImageResource(R.drawable.right);
                 Log.i(functionalSwipes, "Swipe Right");
             }
             ReportAction(currentAction);
@@ -266,14 +299,20 @@ public class GameActivity extends AppCompatActivity {
                 for(int i=0;i<10;i++){
                     if(action[i] && i!=currentAction){
                         resetScore();
+                        mSoundPool.stop(mSoundId2);
+                        mPlayer.stop();
                         return "Failure";
                     }
                 }
             }
             if(action[currentAction]) {
+                soundSpeedUp();
                 return "Success";
+
             }
             resetScore();
+            mSoundPool.stop(mSoundId2);
+            mPlayer.stop();
             return "Time Out";
         }
 
@@ -285,68 +324,25 @@ public class GameActivity extends AppCompatActivity {
         protected void onPostExecute(String result) {
 
             button.setEnabled(true);
+            button.setVisibility(View.VISIBLE);
+            visualPromt.setVisibility(View.INVISIBLE);
 
-            text.setText(result);
-            GameMusic.interrupt();
+
+            button.setText(result);
 
             if (result.equals("Success")) {
                 Log.i(functionalSwipes, "new Game");
-                round++;
+                count++;
                 addToScore();
-                setSpeedUp(round);
+                setSpeedUp(count);
                 button.performClick();
             } else {
-                button.setVisibility(View.VISIBLE);
-                button.setText("Play Again?");
-                getName(round);
-                round = 0;
-                gameOver();
+                count = 0;
                 resetSpeed();
             }
         }
+
     }
-
-    /**
-     *
-     * @return
-     */
-    private void getName(final int record){
-        AlertDialog.Builder alert = new AlertDialog.Builder(this);
-
-        alert.setTitle("Title");
-        alert.setMessage("Message");
-
-        // Set an EditText view to get user input
-        final EditText input = new EditText(this);
-        alert.setView(input);
-
-        alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-                String tempName = input.getText().toString();
-                if(!tempName.isEmpty()) {
-                    setNewRecord(tempName, record);
-                }
-            }
-        });
-
-        alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-                // Canceled.
-            }
-        });
-
-        alert.show();
-    }
-
-    private void setNewRecord(String name, int record){
-        HighScores highScores = new HighScores();
-        highScores.addRecord(name, record);
-    }
-
-    public static void updateBase(baseList list){
-        base = list;
-    }
-
     //Added by Max
     class MyGestureListener extends GestureDetector.SimpleOnGestureListener {
         private static final String DEBUG_TAG = "Gestures";
@@ -395,5 +391,45 @@ public class GameActivity extends AppCompatActivity {
             setAction(0);
             return true;
         }
+    }
+    public void startMusic(){
+
+        MediaPlayer x = new MediaPlayer();
+        mPlayer = x;
+        //Starting one of the three tracks
+        int songSelection = getRandom(1,3);
+
+        if(songSelection == 1){
+            mPlayer = MediaPlayer.create(GameActivity.this, R.raw.level1);
+            mPlayer.start();
+        }
+        else if(songSelection == 2){
+            mPlayer = MediaPlayer.create(GameActivity.this, R.raw.level2);
+            mPlayer.start();
+        }else{
+            mPlayer = MediaPlayer.create(GameActivity.this, R.raw.level3);
+            mPlayer.start();
+        }
+    }
+    public int getRandom(int min, int max){
+        return (min + (int)(Math.random() * ((max - min) + 1)));
+    }
+    @Override
+    protected void onDestroy() {
+        mPlayer.stop();
+
+        //this method will update the firebase
+        //with the username and top score of the session
+        updateScore();
+
+        super.onDestroy();
+    }
+    public void updateScore(){
+        //TODO Implement Fire base top score updating
+
+        Toast.makeText(GameActivity.this,"Session top Score was: " + sessionTopScore,
+                Toast.LENGTH_SHORT).show();
+
+
     }
 }
