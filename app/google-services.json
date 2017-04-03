@@ -1,0 +1,58 @@
+{
+  "project_info": {
+    "project_number": "759956613398",
+    "firebase_url": "https://cs2063project.firebaseio.com",
+    "project_id": "cs2063project",
+    "storage_bucket": "cs2063project.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:759956613398:android:37aee74ada03afdb",
+        "android_client_info": {
+          "package_name": "wallace.scott.fuctionalswipes"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "759956613398-nvl7adr5nbvler3h13idbipcq9186cfu.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "wallace.scott.fuctionalswipes",
+            "certificate_hash": "d03ea3b6a557b6a71cc7a7db2d7d17886280f3ab"
+          }
+        },
+        {
+          "client_id": "759956613398-7ou8a36jme6enkea3v4509ar6lf62dd7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBp6b2mMEI1KdK2Z9fTsR4Ln543FpbkZXU"
+        },
+        {
+          "current_key": "AIzaSyDKM7EQRuasyrEcn3IZDQIu_O8DQG4wQhs"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "759956613398-7ou8a36jme6enkea3v4509ar6lf62dd7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
