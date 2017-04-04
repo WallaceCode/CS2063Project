@@ -1,12 +1,14 @@
 package wallace.scott.fuctionalswipes;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.SoundPool;
 import android.os.AsyncTask;
 import android.support.v4.view.GestureDetectorCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,6 +16,7 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -104,13 +107,6 @@ public class GameActivity extends AppCompatActivity {
                 .build());
         mSoundPool = spb.build();
 
-        // In Lab 7 we will be working with an older API level and will use this instead
-        // of a SoundPool.Builder to create the SoundPool appropriately
-        //mSoundPool = new SoundPool(10, AudioManager.STREAM_MUSIC, 0);
-
-        // Load a bubble popping sound.
-        // See further documentation on SoundPool.play here:
-        // http://developer.android.com/reference/android/media/SoundPool.html
         mSoundId = mSoundPool.load(this, R.raw.bubble_pop, 2);
 
         if(mSoundId == mSoundId2){
@@ -121,8 +117,9 @@ public class GameActivity extends AppCompatActivity {
 
     public void addToScore(){
         scoreView.setText("Score: " + ++score);
-        if(score > sessionTopScore)
+        if(score > sessionTopScore) {
             sessionTopScore = score;
+        }
     }
 
     public void setAction(int choice){
@@ -220,6 +217,8 @@ public class GameActivity extends AppCompatActivity {
             button.setEnabled(false);
             button.setVisibility(View.INVISIBLE);
             visualPromt.setVisibility(View.VISIBLE);
+
+            text.setText("");
 
             mSoundPool.play(mSoundId2,1,1,3,-1,1);
 
@@ -324,11 +323,12 @@ public class GameActivity extends AppCompatActivity {
         protected void onPostExecute(String result) {
 
             button.setEnabled(true);
-            button.setVisibility(View.VISIBLE);
+            //button.setVisibility(View.VISIBLE);
             visualPromt.setVisibility(View.INVISIBLE);
 
+            text.setText(result);
 
-            button.setText(result);
+            //button.setText(result);
 
             if (result.equals("Success")) {
                 Log.i(functionalSwipes, "new Game");
@@ -337,12 +337,55 @@ public class GameActivity extends AppCompatActivity {
                 setSpeedUp(count);
                 button.performClick();
             } else {
+                button.setVisibility(View.VISIBLE);
+                button.setText("Play Again?");
+                if((int)count == sessionTopScore) {
+                    getName((int) count);
+                }
                 count = 0;
                 resetSpeed();
             }
         }
 
     }
+
+    /**
+     *
+     * @return
+     */
+    private void getName(final int record){
+        AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+        alert.setTitle("Enter Your Name");
+        alert.setMessage("Add Your Name To the High Scores");
+
+        // Set an EditText view to get user input
+        final EditText input = new EditText(this);
+        alert.setView(input);
+
+        alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                String tempName = input.getText().toString();
+                if(!tempName.isEmpty()) {
+                    setNewRecord(tempName, record);
+                }
+            }
+        });
+
+        alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                // Canceled.
+            }
+        });
+
+        alert.show();
+    }
+
+    private void setNewRecord(String name, int record){
+        HighScores highScores = new HighScores();
+        highScores.addRecord(name, record);
+    }
+
     //Added by Max
     class MyGestureListener extends GestureDetector.SimpleOnGestureListener {
         private static final String DEBUG_TAG = "Gestures";

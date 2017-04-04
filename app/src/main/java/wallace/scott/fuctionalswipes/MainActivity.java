@@ -19,6 +19,7 @@ public class MainActivity extends AppCompatActivity {
 
         list = new baseList();
         HighScores.setBaseList(list);
+        HighScores.initializeFirebase();
 
         Button plybtn = (Button) findViewById(R.id.playbtn);
         plybtn.setOnClickListener(new View.OnClickListener() {

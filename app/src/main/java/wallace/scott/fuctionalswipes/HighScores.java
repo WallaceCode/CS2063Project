@@ -1,8 +1,6 @@
 package wallace.scott.fuctionalswipes;
 
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -19,12 +17,13 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class HighScores extends AppCompatActivity {
 
 
     private static baseList baseList;
+    private static FirebaseDatabase database;
+    private static DatabaseReference myRef;
     String TAG = "Max, look here ----> ";
     private ArrayList<String> arraylist;
     private ArrayAdapter<String> adapter;
@@ -43,12 +42,38 @@ public class HighScores extends AppCompatActivity {
         baseList = list;
     }
 
+    public static void initializeFirebase(){
+
+        database = FirebaseDatabase.getInstance();
+        myRef = database.getReference("message");
+    }
+
     public boolean addRecord(String player, int score) {
 
         int rank = findPosition(score);
         String[] newPlayer = {Integer.toString(score), player};
         baseList.addToList(rank, newPlayer);
-        //updateScreen();
+        //myRef.setValue(newPlayer);
+/*
+        // Read from the database
+        myRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                // This method is called once with the initial value and again
+                // whenever data at this location is updated.
+                String value = dataSnapshot.getValue(String.class);
+                Log.d(TAG, "Value is: " + value);
+                arraylist.add(value);
+                adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                // Failed to read value
+                Log.w(TAG, "Failed to read value.", error.toException());
+            }
+        });*/
+
         return true;
     }
 
@@ -75,41 +100,6 @@ public class HighScores extends AppCompatActivity {
         ListView listview = (ListView) findViewById(R.id.scorelistview);
         adapter = new ArrayAdapter<String>(this, R.layout.list_item, R.id.txtitem, arrayList);
         listview.setAdapter(adapter);
-
-
-        txtInput = (EditText)findViewById(R.id.txtinput);
-        Button btAdd = (Button)findViewById(R.id.btadd);
-        btAdd.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String newItem = txtInput.getText().toString();
-
-                // Write a message to the database
-                FirebaseDatabase database = FirebaseDatabase.getInstance();
-                DatabaseReference myRef = database.getReference("message");
-
-                myRef.setValue(newItem);
-
-                // Read from the database
-                myRef.addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        // This method is called once with the initial value and again
-                        // whenever data at this location is updated.
-                        String value = dataSnapshot.getValue(String.class);
-                        Log.d(TAG, "Value is: " + value);
-                        arraylist.add(value);
-                        adapter.notifyDataSetChanged();
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError error) {
-                        // Failed to read value
-                        Log.w(TAG, "Failed to read value.", error.toException());
-                    }
-                });
-            }
-        });
     }
 
     public int findPosition(int score){
