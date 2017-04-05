@@ -26,14 +26,14 @@ public class SoundThread implements Runnable {
     private int choice;
     private int seekTo;
 
-    public SoundThread(Context mContext, int sound, int position){
+    public SoundThread(Context mContext, int sound){
         context = mContext;
         choice = sound;
-        seekTo = position*5000;
+        //seekTo = position*5000;
     }
 
     public void run(){
-
+        seekTo = 0;
         if(choice == 2) {
             seekTo = 100;
         }
@@ -42,13 +42,16 @@ public class SoundThread implements Runnable {
 
         switch(choice) {
             case 0:
-                //mPlayer = MediaPlayer.create(context, R.raw.intro_mus);
+                mPlayer = MediaPlayer.create(context, R.raw.level1);
                 break;
             case 1:
-                mPlayer = MediaPlayer.create(context, R.raw.one_way);
+                mPlayer = MediaPlayer.create(context, R.raw.level2);
                 break;
             case 2:
                mPlayer = MediaPlayer.create(context, R.raw.game_over1);
+                break;
+            case 3:
+                mPlayer = MediaPlayer.create(context, R.raw.level3);
                 break;
         }
 
